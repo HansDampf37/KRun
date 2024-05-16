@@ -9,6 +9,8 @@ import java.util.concurrent.TimeUnit
  * The job can be run directly by using [Job.run] or can be scheduled on a [Scheduler] by using [Job.schedule] for asynchronous invocation.
  * [JobEventListener] can be attached to the job in order to react to events asynchronously (either directly by setting the property in
  * the constructor or indirectly by invoking [addEventListener].
+ *
+ *  @author Adrian Degenkolb
  */
 open class Job<I, O>(
     val name: String = "job-${UUID.randomUUID().toString()}",

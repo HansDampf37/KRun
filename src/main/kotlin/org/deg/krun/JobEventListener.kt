@@ -7,6 +7,8 @@ package org.deg.krun
  * @see onStarted
  * @see onDone
  * @see onFailure
+ *
+ * @author Adrian Degenkolb
  */
 interface JobEventListener<I, O> {
     /**
