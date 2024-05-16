@@ -1,0 +1,38 @@
+package org.deg.krun
+
+/**
+ * A JobEventListener can be attached onto a [Job] in order to listen to specific events.
+ * @see Job.addEventListener
+ * @see onScheduled
+ * @see onStarted
+ * @see onDone
+ * @see onFailure
+ */
+interface JobEventListener<I, O> {
+    /**
+     * Is triggered when the Job is scheduled on a [Scheduler].
+     * @param job the [Job] that triggered this event.
+     */
+    fun onScheduled(job: Job<I, O>) {}
+
+    /**
+     * Is triggered right before the Job's [Job.runMethod] is invoked.
+     * @param job the [Job] that triggered this event.
+     * @param input the input arguments for the run method
+     */
+    fun onStarted(input: I, job: Job<I, O>) {}
+
+    /**
+     * Is triggered right after the Job's [Job.runMethod] has finished.
+     * @param job the [Job] that triggered this event.
+     * @param output the output produced by the run method
+     */
+    fun onDone(output: O, job: Job<I, O>) {}
+
+    /**
+     * Is triggered when the Job's [Job.runMethod] throws an uncaught exception.
+     * @param job the [Job] that triggered this event.
+     * @param exception the thrown exception
+     */
+    fun onFailure(exception: Exception, job: Job<I, O>) {}
+}

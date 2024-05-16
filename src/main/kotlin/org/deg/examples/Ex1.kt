@@ -1,9 +1,11 @@
-package org.deg.krun
+package org.deg.examples
 
+import org.deg.krun.Job
+import org.deg.krun.JobEventListener
 import kotlin.system.exitProcess
 
 fun main() {
-    val jobEventListener = object : JobEventListeners<Unit, Int> {
+    val jobEventListener = object : JobEventListener<Unit, Int> {
         override fun onStarted(input: Unit, job: Job<Unit, Int>) = println("started ${job.name}")
         override fun onDone(output: Int, job: Job<Unit, Int>) = println("completed ${job.name}")
         override fun onFailure(exception: Exception, job: Job<Unit, Int>) = println("Failed ${job.name}").apply { exception.printStackTrace() }
