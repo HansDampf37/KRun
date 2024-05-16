@@ -20,4 +20,12 @@ object Scheduler {
     fun shutdown() {
         threadPool.shutdownNow()
     }
+
+    init {
+        Runtime.getRuntime().addShutdownHook(object: Thread() {
+            override fun run() {
+                shutdown()
+            }
+        })
+    }
 }

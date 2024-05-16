@@ -1,5 +1,7 @@
 package org.deg.krun
 
+import kotlin.system.exitProcess
+
 fun main() {
     val jobEventListener = object : JobEventListeners<Unit, Int> {
         override fun onStarted(input: Unit, job: Job<Unit, Int>) = println("started ${job.name}")
@@ -21,5 +23,5 @@ fun main() {
 
     val results = futures.map { it.get() }
     println(results.toTypedArray().contentToString())
-    Scheduler.shutdown()
+    exitProcess(0)
 }
