@@ -8,6 +8,8 @@ import java.util.concurrent.TimeUnit
 
 /**
  * The Scheduler schedules [Jobs][Job] for asynchronous execution.
+ * This Scheduler needs to be shutdown by either using the [shutdown]-method or [System.exit]
+ *
  * @see schedule
  * @author Adrian Degenkolb
  */
