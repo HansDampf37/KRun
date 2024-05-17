@@ -28,8 +28,9 @@ interface JobEventListener<I, O> {
      * Is triggered right after the Job's [Job.runMethod] has finished.
      * @param job the [Job] that triggered this event.
      * @param output the output produced by the run method
+     * @param input the input arguments for the run method.
      */
-    fun onDone(output: O, job: Job<I, O>) {}
+    fun onDone(input: I, output: O, job: Job<I, O>) {}
 
     /**
      * Is triggered when the Job's [Job.runMethod] throws an uncaught exception.

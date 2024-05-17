@@ -2,28 +2,23 @@ package org.deg.examples
 
 import org.deg.krun.Job
 import org.deg.krun.JobEventListener
-import kotlin.system.exitProcess
 
 fun main() {
-    val jobEventListener = object : JobEventListener<Unit, Int> {
-        override fun onStarted(input: Unit, job: Job<Unit, Int>) = println("started ${job.name}")
-        override fun onDone(output: Int, job: Job<Unit, Int>) = println("completed ${job.name}")
-        override fun onFailure(exception: Exception, job: Job<Unit, Int>) = println("Failed ${job.name}").apply { exception.printStackTrace() }
-    }
-
-    val jobs = List(100) { i ->
-        Job(jobEventListener = jobEventListener) { _: Unit ->
-            println("executing $i")
-            return@Job i
+    // Create event listener
+    val jobEventListener = object : JobEventListener<String, Int> {
+        override fun onStarted(input: String, job: Job<String, Int>) {
+            println("Starting to count length of input \"$input\" in job ${job.name}")
         }
-
+        override fun onDone(input: String, output: Int, job: Job<String, Int>) {
+            println("Finished counting. The length of \"$input\" is \"$output\"")
+        }
     }
 
-    val futures = jobs.map { job ->
-        job.schedule(Unit)
+    // Create Job and attach event listener
+    val countLettersJob = Job(jobEventListener = jobEventListener) { input: String ->
+        return@Job input.length
     }
 
-    val results = futures.map { it.get() }
-    println(results.toTypedArray().contentToString())
-    exitProcess(0)
+    // execute job
+    countLettersJob.run("some string")
 }

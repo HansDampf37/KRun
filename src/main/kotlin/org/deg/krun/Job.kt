@@ -8,12 +8,12 @@ import java.util.concurrent.TimeUnit
  * A Job implements some runnable behavior in its [runMethod] with defined input-type [I] and output-type [O].
  * The job can be run directly by using [Job.run] or can be scheduled on a [Scheduler] by using [Job.schedule] for asynchronous invocation.
  * [JobEventListener] can be attached to the job in order to react to events asynchronously (either directly by setting the property in
- * the constructor or indirectly by invoking [addEventListener].
+ * the constructor or indirectly by invoking [addEventListener]).
  *
  *  @author Adrian Degenkolb
  */
 open class Job<I, O>(
-    val name: String = "job-${UUID.randomUUID().toString()}",
+    val name: String = "job-${UUID.randomUUID()}",
     jobEventListener: JobEventListener<I, O>? = null,
     private val runMethod: (input: I) -> O
 ) {
@@ -40,16 +40,10 @@ open class Job<I, O>(
         onStarted(input)
         try {
             val output: O = runMethod(input)
-            onDone(output)
+            onDone(input, output)
             return output
         } catch (e: Exception) {
-            jobEventListeners.forEach {
-                try {
-                    it.onFailure(e, this)
-                } catch (e1: Exception) {
-                    e1.printStackTrace()
-                }
-            }
+            onFailure(e)
             throw e
         }
     }
@@ -76,10 +70,10 @@ open class Job<I, O>(
         }
     }
 
-    private fun onDone(output: O) {
+    private fun onDone(input: I, output: O) {
         jobEventListeners.forEach {
             try {
-                it.onDone(output, this)
+                it.onDone(input, output, this)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -92,6 +86,16 @@ open class Job<I, O>(
                 it.onScheduled(this)
             } catch (e: Exception) {
                 e.printStackTrace()
+            }
+        }
+    }
+
+    private fun onFailure(e: Exception) {
+        jobEventListeners.forEach {
+            try {
+                it.onFailure(e, this)
+            } catch (e1: Exception) {
+                e1.printStackTrace()
             }
         }
     }

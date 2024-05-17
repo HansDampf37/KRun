@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit
 /**
  * The Scheduler schedules [Jobs][Job] for asynchronous execution.
  * @see schedule
- *  @author Adrian Degenkolb
+ * @author Adrian Degenkolb
  */
 object Scheduler {
     private val threadPool = Executors.newCachedThreadPool()
