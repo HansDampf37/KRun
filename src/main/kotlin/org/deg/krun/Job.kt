@@ -26,9 +26,20 @@ open class Job<I, O>(
     /**
      * Adds a new [JobEventListener] to this job.
      * @param jobEventListener the new listener
+     * @return handler of the event listener
      */
-    fun addEventListener(jobEventListener: JobEventListener<I, O>) {
+    fun addEventListener(jobEventListener: JobEventListener<I, O>): Int {
         jobEventListeners.add(jobEventListener)
+        return jobEventListener.hashCode()
+    }
+
+    /**
+     * Removes an existing [JobEventListener] from this job.
+     * @param handler the handler of the event listener is returned by [addEventListener].
+     */
+    fun removeEventListener(handler: Int) {
+        val el = jobEventListeners.find { it.hashCode() == handler } ?: return
+        jobEventListeners.remove(el)
     }
 
     /**
@@ -36,7 +47,7 @@ open class Job<I, O>(
      * @param input input of generic type [I]
      * @return output of generic type [O]
      */
-    fun run(input: I): O {
+    open fun run(input: I): O {
         onStarted(input)
         try {
             val output: O = runMethod(input)

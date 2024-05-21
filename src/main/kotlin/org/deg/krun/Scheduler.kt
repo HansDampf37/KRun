@@ -35,14 +35,14 @@ object Scheduler {
     /**
      * Shuts down the Scheduler.
      */
-    fun shutdown() {
-        threadPool.shutdownNow()
+    fun shutdown(timeout: Long = 0, unit: TimeUnit = TimeUnit.MILLISECONDS) {
+        threadPool.awaitTermination(timeout, unit)
     }
 
     init {
         Runtime.getRuntime().addShutdownHook(object: Thread() {
             override fun run() {
-                shutdown()
+                shutdown(2000)
             }
         })
     }
