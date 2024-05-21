@@ -25,6 +25,7 @@ object Scheduler {
      * @return Future containing the output of the job's [run method][Job.run]
      */
     fun <I, O> schedule(job: Job<I, O>, input: I, delay: Long = 0, unit: TimeUnit = TimeUnit.SECONDS): Future<O?> {
+        job.onScheduled()
         return threadPool.submit(Callable {
             val delayInMs = TimeUnit.MILLISECONDS.convert(delay, unit)
             sleep(delayInMs)
@@ -46,4 +47,15 @@ object Scheduler {
             }
         })
     }
+}
+
+/**
+ * Schedules this Job on a [Scheduler] for asynchronous execution.
+ * @param input input arguments for the job's [run method][Job.run]
+ * @param delay delay after which the job is executed
+ * @param unit timeunit for the delay
+ * @return Future containing the output of the [run method][Job.run]
+ */
+fun <I, O> Job<I, O>.schedule(input: I, delay: Long = 0, unit: TimeUnit = TimeUnit.SECONDS): Future<O?> {
+    return Scheduler.schedule(this, input, delay, unit)
 }

@@ -3,6 +3,7 @@ package org.deg.examples
 import org.deg.krun.Aggregate
 import org.deg.krun.Job
 import org.deg.krun.Scheduler
+import org.deg.krun.schedule
 
 fun main() {
     val job1 = Job<Unit, Int> {

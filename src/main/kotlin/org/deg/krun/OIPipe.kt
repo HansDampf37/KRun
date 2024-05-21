@@ -7,10 +7,6 @@ open class OIPipe<O, I>(fromJob: Job<*, O>, val toJob: Job<I, *>, conversion: (o
                 val convertedInput = conversion(output)
                 toJob.run(convertedInput)
             }
-
-            override fun onFailure(exception: Exception, job: Job<Any?, O>) {
-                println("Job failed with exception: ${exception.message}")
-            }
         }
         // TODO possible without cast?
         (fromJob as Job<Any?, O>).addEventListener(jobEventListener)

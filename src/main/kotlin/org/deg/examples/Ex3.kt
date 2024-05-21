@@ -2,6 +2,7 @@ package org.deg.examples
 
 import org.deg.krun.Job
 import org.deg.krun.JobEventListener
+import org.deg.krun.schedule
 import java.lang.Thread.sleep
 import kotlin.system.exitProcess
 

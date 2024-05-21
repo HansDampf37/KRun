@@ -1,8 +1,6 @@
 package org.deg.krun
 
 import java.util.*
-import java.util.concurrent.Future
-import java.util.concurrent.TimeUnit
 
 /**
  * A Job implements some runnable behavior in its [runMethod] with defined input-type [I] and output-type [O].
@@ -36,10 +34,22 @@ open class Job<I, O>(
     /**
      * Removes an existing [JobEventListener] from this job.
      * @param handler the handler of the event listener is returned by [addEventListener].
+     * @return true if a JobEventListener was removed, false otherwise.
      */
-    fun removeEventListener(handler: Int) {
-        val el = jobEventListeners.find { it.hashCode() == handler } ?: return
+    fun removeEventListener(handler: Int): Boolean {
+        val el = jobEventListeners.find { it.hashCode() == handler } ?: return false
         jobEventListeners.remove(el)
+        return true
+    }
+
+    /**
+     * Returns and removes all [JobEventListener]s from this job.
+     * @return the returned [JobEventListener]
+     */
+    fun removeAllEventListeners(): List<JobEventListener<I, O>> {
+        val listeners = jobEventListeners.toList()
+        jobEventListeners.clear()
+        return listeners
     }
 
     /**
@@ -57,18 +67,6 @@ open class Job<I, O>(
             onFailure(e)
             throw e
         }
-    }
-
-    /**
-     * Schedules this Job on a [Scheduler] for asynchronous execution.
-     * @param input input arguments for the job's [run method][Job.run]
-     * @param delay delay after which the job is executed
-     * @param unit timeunit for the delay
-     * @return Future containing the output of the [run method][Job.run]
-     */
-    fun schedule(input: I, delay: Long = 0, unit: TimeUnit = TimeUnit.SECONDS): Future<O?> {
-        onScheduled()
-        return Scheduler.schedule(this, input, delay, unit)
     }
 
     private fun onStarted(input: I) {
@@ -91,7 +89,7 @@ open class Job<I, O>(
         }
     }
 
-    private fun onScheduled() {
+    internal fun onScheduled() {
         jobEventListeners.forEach {
             try {
                 it.onScheduled(this)
