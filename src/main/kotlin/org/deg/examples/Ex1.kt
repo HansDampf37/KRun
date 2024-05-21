@@ -1,11 +1,11 @@
 package org.deg.examples
 
 import org.deg.krun.Job
-import org.deg.krun.JobEventListener
+import org.deg.krun.IJobEventListener
 
 fun main() {
     // Create event listener
-    val jobEventListener = object : JobEventListener<String, Int> {
+    val jobEventListener = object : IJobEventListener<String, Int> {
         override fun onStarted(input: String, job: Job<String, Int>) {
             println("Starting to count length of input \"$input\" in job ${job.name}")
         }

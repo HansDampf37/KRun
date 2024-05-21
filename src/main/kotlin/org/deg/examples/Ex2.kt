@@ -1,7 +1,7 @@
 package org.deg.examples
 
 import org.deg.krun.Job
-import org.deg.krun.JobEventListener
+import org.deg.krun.IJobEventListener
 
 fun main() {
     // create job that will fail
@@ -10,7 +10,7 @@ fun main() {
     }
 
     // attach event listener
-    failJob.addEventListener(object : JobEventListener<Unit, Nothing> {
+    failJob.addEventListener(object : IJobEventListener<Unit, Nothing> {
         override fun onFailure(exception: Exception, job: Job<Unit, Nothing>) {
             println("Job ${job.name} threw an exception of type ${exception::class}")
         }

@@ -5,34 +5,34 @@ import java.util.*
 /**
  * A Job implements some runnable behavior in its [runMethod] with defined input-type [I] and output-type [O].
  * The job can be run directly by using [Job.run] or can be scheduled on a [Scheduler] by using [Job.schedule] for asynchronous invocation.
- * [JobEventListener] can be attached to the job in order to react to events asynchronously (either directly by setting the property in
+ * [IJobEventListener] can be attached to the job in order to react to events asynchronously (either directly by setting the property in
  * the constructor or indirectly by invoking [addEventListener]).
  *
  *  @author Adrian Degenkolb
  */
 open class Job<I, O>(
     val name: String = "job-${UUID.randomUUID()}",
-    jobEventListener: JobEventListener<I, O>? = null,
+    jobEventListener: IJobEventListener<I, O>? = null,
     private val runMethod: (input: I) -> O
 ) {
-    private val jobEventListeners: MutableList<JobEventListener<I, O>> = ArrayList()
+    private val jobEventListeners: MutableList<IJobEventListener<I, O>> = ArrayList()
 
     init {
         if (jobEventListener != null) addEventListener(jobEventListener)
     }
 
     /**
-     * Adds a new [JobEventListener] to this job.
+     * Adds a new [IJobEventListener] to this job.
      * @param jobEventListener the new listener
      * @return handler of the event listener
      */
-    fun addEventListener(jobEventListener: JobEventListener<I, O>): Int {
+    fun addEventListener(jobEventListener: IJobEventListener<I, O>): Int {
         jobEventListeners.add(jobEventListener)
         return jobEventListener.hashCode()
     }
 
     /**
-     * Removes an existing [JobEventListener] from this job.
+     * Removes an existing [IJobEventListener] from this job.
      * @param handler the handler of the event listener is returned by [addEventListener].
      * @return true if a JobEventListener was removed, false otherwise.
      */
@@ -43,10 +43,10 @@ open class Job<I, O>(
     }
 
     /**
-     * Returns and removes all [JobEventListener]s from this job.
-     * @return the returned [JobEventListener]
+     * Returns and removes all [IJobEventListener]s from this job.
+     * @return the returned [IJobEventListener]
      */
-    fun removeAllEventListeners(): List<JobEventListener<I, O>> {
+    fun removeAllEventListeners(): List<IJobEventListener<I, O>> {
         val listeners = jobEventListeners.toList()
         jobEventListeners.clear()
         return listeners

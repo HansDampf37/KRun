@@ -2,7 +2,7 @@ package org.deg.krun
 
 open class OIPipe<O, I>(fromJob: Job<*, O>, val toJob: Job<I, *>, conversion: (output: O) -> I) {
     init {
-        val jobEventListener = object : JobEventListener<Any?, O> {
+        val jobEventListener = object : IJobEventListener<Any?, O> {
             override fun onDone(input: Any?, output: O, job: Job<Any?, O>) {
                 val convertedInput = conversion(output)
                 toJob.run(convertedInput)

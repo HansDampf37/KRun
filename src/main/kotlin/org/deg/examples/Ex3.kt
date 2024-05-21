@@ -1,13 +1,13 @@
 package org.deg.examples
 
 import org.deg.krun.Job
-import org.deg.krun.JobEventListener
+import org.deg.krun.IJobEventListener
 import org.deg.krun.schedule
 import java.lang.Thread.sleep
 import kotlin.system.exitProcess
 
 fun main() {
-    val jobEventListener = object : JobEventListener<Unit, Int> {
+    val jobEventListener = object : IJobEventListener<Unit, Int> {
         override fun onStarted(input: Unit, job: Job<Unit, Int>) = println("started ${job.name}")
         override fun onDone(input: Unit, output: Int, job: Job<Unit, Int>) = println("completed ${job.name}")
     }

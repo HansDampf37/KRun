@@ -11,7 +11,7 @@ class Aggregate(
     init {
         inputJobs.forEachIndexed { index, job ->
             // TODO possible without cast?
-            (job as Job<Any?, Any?>).addEventListener(object: JobEventListener<Any?, Any?> {
+            (job as Job<Any?, Any?>).addEventListener(object: IJobEventListener<Any?, Any?> {
                 override fun onDone(input: Any?, output: Any?, job: Job<Any?, Any?>) {
                     previousJobsOutputs[index] = output
                     previousJobsFinished[index] = true

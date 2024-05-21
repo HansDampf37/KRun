@@ -10,7 +10,7 @@ package org.deg.krun
  *
  * @author Adrian Degenkolb
  */
-interface JobEventListener<I, O> {
+interface IJobEventListener<I, O> {
     /**
      * Is triggered when the Job is scheduled on a [Scheduler].
      * @param job the [Job] that triggered this event.
