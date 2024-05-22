@@ -1,8 +1,11 @@
 package org.deg.krun
 
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import java.lang.Thread.sleep
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 
 class SchedulerTest {
     @Test
@@ -45,5 +48,22 @@ class SchedulerTest {
         val epsilon = 10
         Scheduler.schedule(job, Unit, delay, TimeUnit.MILLISECONDS).get()
         assertTrue(started - scheduled > delay - epsilon)
+    }
+
+    @Test
+    fun testTimeout() {
+        val job = Job<Unit, Unit> {sleep(10000)}
+        try {
+            Scheduler.schedule(job, Unit).get(10, TimeUnit.MILLISECONDS)
+            fail("Expected a timeout to be thrown")
+        } catch (_: TimeoutException) {}
+    }
+
+    companion object {
+        @JvmStatic
+        @AfterAll
+        fun cleanUp() {
+            Scheduler.shutdown()
+        }
     }
 }
