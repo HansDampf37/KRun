@@ -24,13 +24,17 @@ object Scheduler {
      * @param unit timeunit for the delay
      * @return Future containing the output of the job's [run method][Job.run]
      */
-    fun <I, O> schedule(job: Job<I, O>, input: I, delay: Long = 0, unit: TimeUnit = TimeUnit.SECONDS): Future<O?> {
+    fun <I, O> schedule(job: Job<I, O>, input: I, delay: Long = 0, unit: TimeUnit = TimeUnit.SECONDS): Future<O> {
         job.onScheduled()
         return threadPool.submit(Callable {
             val delayInMs = TimeUnit.MILLISECONDS.convert(delay, unit)
             sleep(delayInMs)
             job.run(input)
         })
+    }
+
+    fun <O> schedule(job: Job<Unit, O>, delay: Long = 0, unit: TimeUnit = TimeUnit.SECONDS): Future<O> {
+        return schedule(job, Unit, delay, unit)
     }
 
     /**
@@ -56,6 +60,6 @@ object Scheduler {
  * @param unit timeunit for the delay
  * @return Future containing the output of the [run method][Job.run]
  */
-fun <I, O> Job<I, O>.schedule(input: I, delay: Long = 0, unit: TimeUnit = TimeUnit.SECONDS): Future<O?> {
+fun <I, O> Job<I, O>.schedule(input: I, delay: Long = 0, unit: TimeUnit = TimeUnit.SECONDS): Future<O> {
     return Scheduler.schedule(this, input, delay, unit)
 }
