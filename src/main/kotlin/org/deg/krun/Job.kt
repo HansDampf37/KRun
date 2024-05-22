@@ -125,7 +125,7 @@ open class Job<I, O>(
      * @param previousJob the job after which this job is triggered
      * @return a [Future] for this job
      */
-    open fun <I1 : I> triggerAfter(previousJob: Job<*, I1>) = triggerAfter(previousJob, ::identity)
+    open fun <I1 : I> triggerAfter(previousJob: Job<*, I1>) = triggerAfter(previousJob, Utils::identity)
 
     /**
      * Waits until the job is complete.
