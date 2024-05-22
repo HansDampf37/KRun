@@ -105,7 +105,7 @@ open class Job<I, O>(
     /**
      * Trigger this job automatically after another job has finished.
      * @param previousJob the job after which this job is triggered
-     * @param block transforms the output of the [previousJob] to an fitting input-format for this job
+     * @param block transforms the output of the [previousJob] to a fitting input-format for this job
      * @return a [Future] for this job
      */
     open fun <I1, O1> triggerAfter(previousJob: Job<I1, O1>, block: (output: O1) -> I): Future<O> {
