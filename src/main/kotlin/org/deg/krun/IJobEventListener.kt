@@ -38,4 +38,11 @@ interface IJobEventListener<I, O> {
      * @param exception the thrown exception
      */
     fun onFailure(exception: Exception, job: Job<I, O>) {}
+
+    /**
+     * Is triggered when the Job is canceled by the [Scheduler].
+     *
+     * @param job the [Job] that triggered this event.
+     */
+    fun onCancel(job: Job<I, O>) {}
 }
