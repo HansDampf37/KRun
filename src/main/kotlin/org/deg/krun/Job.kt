@@ -1,9 +1,6 @@
 package org.deg.krun
 
 import java.util.*
-import java.util.concurrent.Future
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.TimeoutException
 
 /**
  * A Job implements some runnable behavior in its [runMethod] with defined input-type [I] and output-type [O].
@@ -79,82 +76,6 @@ open class Job<I, O>(
         return listeners
     }
 
-    /**
-     * @return a [Future] that can be used to await this jobs termination and to get the output.
-     */
-    fun getFuture(): Future<O> {
-        return object : Future<O> {
-            override fun cancel(mayInterruptIfRunning: Boolean): Boolean = false
-
-            override fun isCancelled(): Boolean = status == JobStatus.Canceled
-
-            override fun isDone(): Boolean = status == JobStatus.Done
-
-            override fun get(): O {
-                waitForTermination()
-                return output!!
-            }
-
-            override fun get(timeout: Long, unit: TimeUnit): O {
-                waitForTermination(timeout, unit)
-                return output!!
-            }
-        }
-    }
-
-    /**
-     * Trigger this job automatically after another job has finished.
-     * @param previousJob the job after which this job is triggered
-     * @param block transforms the output of the [previousJob] to a fitting input-format for this job
-     * @return a [Future] for this job
-     */
-    open fun <I1, O1> triggerAfter(previousJob: Job<I1, O1>, block: (output: O1) -> I): Future<O> {
-        val jobEventListener: IJobEventListener<I1, O1> = object : IJobEventListener<I1, O1> {
-            override fun onDone(input: I1, output: O1, job: Job<I1, O1>) {
-                val convertedOutput = block(output)
-                Scheduler.schedule(this@Job, convertedOutput)
-            }
-        }
-        previousJob.addEventListener(jobEventListener)
-        return getFuture()
-    }
-
-    /**
-     * Trigger this job automatically after another job has finished and use the previous jobs output as input for
-     * this job.
-     * @param previousJob the job after which this job is triggered
-     * @return a [Future] for this job
-     */
-    open fun <I1 : I> triggerAfter(previousJob: Job<*, I1>) = triggerAfter(previousJob, Utils::identity)
-
-    /**
-     * Waits until the job is complete.
-     * If the specified timeout is reached a [TimeoutException] is thrown.
-     *
-     * @param timeout the duration
-     * @param unit the unit of the [timeout]
-     * @throws TimeoutException if the timeout is exceeded
-     */
-    fun waitForTermination(timeout: Long = -1, unit: TimeUnit = TimeUnit.MILLISECONDS) {
-        synchronized(finishedLock) {
-            val timeoutMillis = unit.toMillis(timeout)
-            val endTime = System.currentTimeMillis() + timeoutMillis
-            while (output == null) {
-                val remainingTime = endTime - System.currentTimeMillis()
-                if (timeout > 0 && remainingTime <= 0) {
-                    throw TimeoutException("Awaiting job $name timed out after $timeout $unit")
-                }
-                try {
-                    if (timeout > 0) finishedLock.wait(remainingTime)
-                    else finishedLock.wait()
-                } catch (e: InterruptedException) {
-                    e.printStackTrace()
-                }
-            }
-        }
-    }
-
-
     protected open fun onStarted(input: I) {
         status = JobStatus.Running
         jobEventListeners.forEach {
@@ -197,6 +118,17 @@ open class Job<I, O>(
         jobEventListeners.forEach {
             try {
                 it.onFailure(e, this)
+            } catch (e1: Exception) {
+                e1.printStackTrace()
+            }
+        }
+    }
+
+    internal open fun onCancel() {
+        status = JobStatus.Canceled
+        jobEventListeners.forEach {
+            try {
+                it.onCancel(this)
             } catch (e1: Exception) {
                 e1.printStackTrace()
             }

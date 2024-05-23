@@ -3,17 +3,18 @@ package org.deg.krun
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.fail
 import java.lang.Thread.sleep
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 
 class SchedulerTest {
     @Test
-    fun testJobIsScheduledAndThenStarted() {
+    fun `test that job is scheduled and then started`() {
         var scheduled = false
         var started = false
         val job = Job<Unit, Unit> {}
-        job.addEventListener(object: IJobEventListener<Unit, Unit> {
+        job.addEventListener(object : IJobEventListener<Unit, Unit> {
             override fun onScheduled(job: Job<Unit, Unit>) {
                 assertFalse(scheduled)
                 assertFalse(started)
@@ -31,11 +32,11 @@ class SchedulerTest {
     }
 
     @Test
-    fun testScheduleWithDelay() {
+    fun `test scheduling with delay`() {
         var scheduled: Long = 0
         var started: Long = 0
         val job = Job<Unit, Unit> {}
-        job.addEventListener(object: IJobEventListener<Unit, Unit> {
+        job.addEventListener(object : IJobEventListener<Unit, Unit> {
             override fun onScheduled(job: Job<Unit, Unit>) {
                 scheduled = System.currentTimeMillis()
             }
@@ -51,12 +52,57 @@ class SchedulerTest {
     }
 
     @Test
-    fun testTimeout() {
-        val job = Job<Unit, Unit> {sleep(10000)}
+    fun `test future timing out when job takes to long throws TimeoutException`() {
+        val job = Job<Unit, Unit> { sleep(10000) }
         try {
             Scheduler.schedule(job, Unit).get(10, TimeUnit.MILLISECONDS)
             fail("Expected a timeout to be thrown")
-        } catch (_: TimeoutException) {}
+        } catch (_: TimeoutException) {
+        }
+    }
+
+    @Test
+    fun `test automatic scheduling after another job`() {
+        val calculateSomething = Job<Int, Int> { return@Job it * it }
+        val printResults = Job<Any, String> { it.toString() }
+        val future = Scheduler.scheduleAfter(printResults, calculateSomething)
+        Scheduler.schedule(calculateSomething, 3)
+        val result = future.get()
+        assertEquals("9", result)
+    }
+
+    @Test
+    fun `test automatic scheduling after another job with output transformation`() {
+        val calculateSomething = Job<Int, Int> { return@Job it * it }
+        val countSymbols = Job<String, Int> { it.length }
+        val future = Scheduler.scheduleAfter(countSymbols, calculateSomething) { it.toString() }
+        Scheduler.schedule(calculateSomething, 10)
+        val result = future.get()
+        assertEquals(3, result)
+    }
+
+    @Test
+    fun `test canceling job with future`() {
+        var canceled = false
+        val cancelListener = object: IJobEventListener<Unit, Int> {
+            override fun onCancel(job: Job<Unit, Int>) { canceled = true }
+            override fun onDone(input: Unit, output: Int, job: Job<Unit, Int>) {
+                fail("Job should not complete because it was canceled")
+            }
+            override fun onFailure(exception: Exception, job: Job<Unit, Int>) {
+                fail("Job should not complete because it was canceled")
+            }
+        }
+
+        val job = Job(jobEventListener = cancelListener) {
+            sleep(10000)
+            return@Job 0
+        }
+        val future = job.schedule()
+        val success = future.cancel(true)
+        assertTrue(success)
+        assertTrue(canceled)
+        assertEquals(JobStatus.Canceled, job.status)
     }
 
     companion object {

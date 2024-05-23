@@ -2,9 +2,6 @@ package org.deg.krun
 
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
-import java.lang.Thread.sleep
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.TimeoutException
 
 class JobTest {
     private var job = Job<Int, String> {return@Job it.toString()}
@@ -94,42 +91,6 @@ class JobTest {
         } catch (e: Throwable) {
             assertTrue(started && failed)
         }
-    }
-
-    @Test
-    fun testPipe() {
-        val calculateSomething = Job<Int, Int> { return@Job it * it }
-        val printResults = Job<Any, String> { it.toString() }
-        val future = printResults.triggerAfter(calculateSomething)
-        calculateSomething.run(3)
-        val result = future.get()
-        assertEquals("9", result)
-    }
-
-    @Test
-    fun testPipe2() {
-        val calculateSomething = Job<Int, Int> { return@Job it * it }
-        val countSymbols = Job<String, Int> { it.length }
-        val future = countSymbols.triggerAfter(calculateSomething) { it.toString() }
-        calculateSomething.run(10)
-        val result = future.get()
-        assertEquals(3, result)
-    }
-
-    @Test
-    fun testGetFuture() {
-        val job = Job<Unit, Int> {
-            sleep(1000)
-            return@Job 1
-        }
-        val future = job.getFuture()
-        Scheduler.schedule(job, Unit)
-        try {
-            val result = future.get(10, TimeUnit.MILLISECONDS)
-            fail("Expected a timeout to be thrown, instead got result $result")
-        } catch (_: TimeoutException) { }
-        val result = future.get()
-        assertEquals(1, result)
     }
 
     companion object {
