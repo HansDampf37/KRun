@@ -24,7 +24,7 @@ fun main() {
     }
 
     // instead of running jobs synchronously we can also schedule them for asynchronous execution
-    val futures = jobs.map { job -> job.schedule(Unit) }
+    val futures = jobs.map { job -> job.schedule() }
 
     // retrieve job results
     val results = futures.map { it.get() }

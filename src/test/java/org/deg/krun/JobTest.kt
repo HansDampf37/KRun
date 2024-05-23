@@ -66,6 +66,7 @@ class JobTest {
     }
 
     @Test
+    @Suppress("IMPLICIT_NOTHING_TYPE_ARGUMENT_IN_RETURN_POSITION", "UNREACHABLE_CODE")
     fun testFailingRun() {
         val failJob = Job<Unit, Nothing> {
             throw Exception("")
@@ -88,8 +89,7 @@ class JobTest {
             }
         })
         try {
-            failJob.run(Unit)
-            @Suppress("UNREACHABLE_CODE")
+            failJob.run()
             fail(message = "The job should fail and go into the catch statement")
         } catch (e: Throwable) {
             assertTrue(started && failed)

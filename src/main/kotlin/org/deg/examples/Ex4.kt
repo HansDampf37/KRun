@@ -18,7 +18,7 @@ fun main() {
     Aggregate(listOf(job1, job2)) {
         printJob.run(it)
     }
-    job1.schedule(Unit).get()
-    job2.schedule(Unit).get()
+    job1.schedule().get()
+    job2.schedule().get()
     Scheduler.shutdown()
 }

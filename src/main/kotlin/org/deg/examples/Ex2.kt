@@ -2,6 +2,7 @@ package org.deg.examples
 
 import org.deg.krun.Job
 import org.deg.krun.IJobEventListener
+import org.deg.krun.run
 
 fun main() {
     // create job that will fail
@@ -17,5 +18,6 @@ fun main() {
     })
 
     // run job
-    failJob.run(Unit)
+    @Suppress("IMPLICIT_NOTHING_TYPE_ARGUMENT_IN_RETURN_POSITION")
+    failJob.run()
 }

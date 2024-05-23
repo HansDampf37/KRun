@@ -63,3 +63,8 @@ object Scheduler {
 fun <I, O> Job<I, O>.schedule(input: I, delay: Long = 0, unit: TimeUnit = TimeUnit.SECONDS): Future<O> {
     return Scheduler.schedule(this, input, delay, unit)
 }
+
+/**
+ * Invoke [Job.schedule] with Unit as input
+ */
+fun <O> Job<Unit, O>.schedule(delay: Long = 0, unit: TimeUnit = TimeUnit.SECONDS): Future<O> = schedule(Unit, delay, unit)

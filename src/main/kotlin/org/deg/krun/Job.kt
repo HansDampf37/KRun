@@ -202,10 +202,9 @@ open class Job<I, O>(
             }
         }
     }
-
-    companion object {
-        fun <T, S : T> identity(lastJobsOutput: S): T {
-            return lastJobsOutput
-        }
-    }
 }
+
+/**
+ * Invokes [Job.run] without inputs
+ */
+fun <O> Job<Unit, O>.run() = run(Unit)
