@@ -82,6 +82,33 @@ class SchedulerTest {
     }
 
     @Test
+    fun `test automatic scheduling cancels when previous job is canceled`() {
+        val slowJob = Job<Unit, Int> {
+            sleep(100000)
+            return@Job 1
+        }
+        val dependingJob = Job<Int, Int> { it * it }
+        val futureSlowJob = Scheduler.schedule(slowJob)
+        val futureDependingJob = Scheduler.scheduleAfter(dependingJob, slowJob)
+        futureSlowJob.cancel(true)
+        assertTrue(futureDependingJob.isCancelled)
+        assertEquals(JobStatus.Canceled, dependingJob.status)
+    }
+
+    @Test
+    fun `test automatic scheduling cancels when previous job fails`() {
+        val slowJob = Job<Unit, Int> {
+            throw Exception()
+        }
+        val dependingJob = Job<Int, Int> { it * it }
+        val futureDependingJob = Scheduler.scheduleAfter(dependingJob, slowJob)
+        Scheduler.schedule(slowJob)
+        sleep(30)
+        assertTrue(futureDependingJob.isCancelled)
+        assertEquals(JobStatus.Canceled, dependingJob.status)
+    }
+
+    @Test
     fun `test canceling job with future`() {
         var canceled = false
         val cancelListener = object: IJobEventListener<Unit, Int> {

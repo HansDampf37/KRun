@@ -54,32 +54,32 @@ object Scheduler {
     /**
      * Schedule this job automatically after another job has finished.
      *
-     * @param job the job to be scheduled
+     * @param laterJob the job to be scheduled
      * @param previousJob the job after which this job is triggered
-     * @param delay delay between completion of [previousJob] and start of [job]
+     * @param delay delay between completion of [previousJob] and start of [laterJob]
      * @param unit unit of the delay
      * @param transform transforms the output of the [previousJob] to a fitting input-format for this job
      * @return a [Future] for this job
      */
     fun <I, O, I1, O1>scheduleAfter(
-        job: Job<I, O>,
+        laterJob: Job<I, O>,
         previousJob: Job<I1, O1>,
         delay: Long = 0,
         unit: TimeUnit = TimeUnit.SECONDS,
         transform: (O1) -> I
     ): Future<O> {
         if (arrayOf(JobStatus.Canceled, JobStatus.Done, JobStatus.Failed).contains(previousJob.status)) {
-            throw IllegalArgumentException("Job $job cannot be scheduled after job $previousJob because previous job is already finished")
+            throw IllegalArgumentException("Job $laterJob cannot be scheduled after job $previousJob because previous job is already finished")
         }
 
         var jobInput: I? = null
         val wakeUpLock = Object()
 
-        val wakeUpJob = Job<Unit, O>(name="Wake-Up-Job for ${job.name}") {
+        val wakeUpJob = Job<Unit, O>(name="Wake-Up-Job for ${laterJob.name}") {
             synchronized(wakeUpLock) {
                 wakeUpLock.wait()
             }
-            schedule(job, jobInput!!, delay, unit).get()
+            schedule(laterJob, jobInput!!, delay, unit).get()
         }
         val future = schedule(wakeUpJob)
 
@@ -96,6 +96,7 @@ object Scheduler {
             }
 
             override fun onCancel(job: Job<I1, O1>) {
+                laterJob.onCancel()
                 future.cancel(true)
             }
         })
@@ -105,20 +106,20 @@ object Scheduler {
 
     /**
      * Schedule this job automatically after another job has finished. Uses the output of [previousJob] as input for
-     * [job]
+     * [laterJob]
      *
-     * @param job the job to be scheduled
+     * @param laterJob the job to be scheduled
      * @param previousJob the job after which this job is triggered
-     * @param delay delay between completion of [previousJob] and start of [job]
+     * @param delay delay between completion of [previousJob] and start of [laterJob]
      * @param unit unit of the delay
      * @return a [Future] for this job
      */
     fun <I, O, I1, O1 : I>scheduleAfter(
-        job: Job<I, O>,
+        laterJob: Job<I, O>,
         previousJob: Job<I1, O1>,
         delay: Long = 0,
         unit: TimeUnit = TimeUnit.SECONDS,
-    ) = scheduleAfter(job, previousJob, delay, unit, Utils::identity)
+    ) = scheduleAfter(laterJob, previousJob, delay, unit, Utils::identity)
 
     /**
      * Shuts down the Scheduler.
