@@ -21,8 +21,6 @@ open class Job<I, O>(
     var status: State = State.Inactive
         private set
     private val jobEventListeners: MutableList<IJobEventListener<I, O>> = ArrayList()
-    private var output: O? = null
-    private var finishedLock = Object()
 
     init {
         if (jobEventListener != null) addEventListener(jobEventListener)
@@ -89,10 +87,6 @@ open class Job<I, O>(
 
     protected open fun onDone(input: I, output: O) {
         status = State.Done
-        this.output = output
-        synchronized(finishedLock) {
-            finishedLock.notifyAll()
-        }
         jobEventListeners.forEach {
             try {
                 it.onDone(input, output, this)
