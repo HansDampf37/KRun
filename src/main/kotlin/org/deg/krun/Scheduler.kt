@@ -47,6 +47,13 @@ object Scheduler {
         }
     }
 
+    /**
+     * Schedules a Job on this [Scheduler] for asynchronous execution.
+     * @param job the job that should be scheduled
+     * @param delay delay after which the job is executed
+     * @param unit timeunit for the delay
+     * @return Future containing the output of the job's [run method][Job.run]
+     */
     fun <O> schedule(job: Job<Unit, O>, delay: Long = 0, unit: TimeUnit = TimeUnit.SECONDS): Future<O> {
         return schedule(job, Unit, delay, unit)
     }
@@ -125,7 +132,8 @@ object Scheduler {
      * Shuts down the Scheduler.
      */
     fun shutdown(timeout: Long = 0, unit: TimeUnit = TimeUnit.MILLISECONDS) {
-        threadPool.awaitTermination(timeout, unit)
+        if (timeout == 0L) threadPool.shutdown()
+        else threadPool.awaitTermination(timeout, unit)
     }
 
     init {
