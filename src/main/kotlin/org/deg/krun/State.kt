@@ -1,7 +1,7 @@
 package org.deg.krun
 
 enum class State {
-    Inactive,
+    Ready,
     Scheduled,
     Running,
     Canceled,

@@ -18,12 +18,16 @@ open class Job<I, O>(
     /**
      * The current [State] describes the current state of the Job. For example, it could be [State.Running].
      */
-    var status: State = State.Inactive
-        private set
+    open var state: State = State.Ready
+        protected set(value) {
+            field = value
+            statistic.notifyStateChange(value)
+        }
+    val statistic = Statistic()
     private val jobEventListeners: MutableList<IJobEventListener<I, O>> = ArrayList()
 
     init {
-        if (jobEventListener != null) addEventListener(jobEventListener)
+        if (jobEventListener != null) jobEventListeners.add(jobEventListener)
     }
 
     /**
@@ -75,7 +79,7 @@ open class Job<I, O>(
     }
 
     protected open fun onStarted(input: I) {
-        status = State.Running
+        state = State.Running
         jobEventListeners.forEach {
             try {
                 it.onStarted(input, this)
@@ -86,7 +90,7 @@ open class Job<I, O>(
     }
 
     protected open fun onDone(input: I, output: O) {
-        status = State.Done
+        state = State.Done
         jobEventListeners.forEach {
             try {
                 it.onDone(input, output, this)
@@ -97,7 +101,7 @@ open class Job<I, O>(
     }
 
     internal open fun onScheduled() {
-        status = State.Scheduled
+        state = State.Scheduled
         jobEventListeners.forEach {
             try {
                 it.onScheduled(this)
@@ -108,7 +112,7 @@ open class Job<I, O>(
     }
 
     protected open fun onFailure(e: Exception) {
-        status = State.Failed
+        state = State.Failed
         jobEventListeners.forEach {
             try {
                 it.onFailure(e, this)
@@ -119,7 +123,7 @@ open class Job<I, O>(
     }
 
     internal open fun onCancel() {
-        status = State.Canceled
+        state = State.Canceled
         jobEventListeners.forEach {
             try {
                 it.onCancel(this)

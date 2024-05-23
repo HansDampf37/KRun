@@ -92,7 +92,7 @@ class SchedulerTest {
         val futureDependingJob = Scheduler.scheduleAfter(dependingJob, slowJob)
         futureSlowJob.cancel(true)
         assertTrue(futureDependingJob.isCancelled)
-        assertEquals(State.Canceled, dependingJob.status)
+        assertEquals(State.Canceled, dependingJob.state)
     }
 
     @Test
@@ -105,7 +105,7 @@ class SchedulerTest {
         Scheduler.schedule(slowJob)
         sleep(30)
         assertTrue(futureDependingJob.isCancelled)
-        assertEquals(State.Canceled, dependingJob.status)
+        assertEquals(State.Canceled, dependingJob.state)
     }
 
     @Test
@@ -129,7 +129,7 @@ class SchedulerTest {
         val success = future.cancel(true)
         assertTrue(success)
         assertTrue(canceled)
-        assertEquals(State.Canceled, job.status)
+        assertEquals(State.Canceled, job.state)
     }
 
     companion object {

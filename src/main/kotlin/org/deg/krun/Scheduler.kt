@@ -68,7 +68,7 @@ object Scheduler {
         unit: TimeUnit = TimeUnit.SECONDS,
         transform: (O1) -> I
     ): Future<O> {
-        if (arrayOf(State.Canceled, State.Done, State.Failed).contains(previousJob.status)) {
+        if (arrayOf(State.Canceled, State.Done, State.Failed).contains(previousJob.state)) {
             throw IllegalArgumentException("Job $laterJob cannot be scheduled after job $previousJob because previous job is already finished")
         }
 
