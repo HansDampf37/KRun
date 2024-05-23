@@ -46,14 +46,14 @@ class JobTest {
             override fun onStarted(input: Int, job: Job<Int, String>) {
                 assertFalse(started)
                 assertFalse(done)
-                assertEquals(JobStatus.Running, job.status)
+                assertEquals(State.Running, job.status)
                 started = true
             }
 
             override fun onDone(input: Int, output: String, job: Job<Int, String>) {
                 assertTrue(started)
                 assertFalse(done)
-                assertEquals(JobStatus.Done, job.status)
+                assertEquals(State.Done, job.status)
                 done = true
             }
         })
@@ -74,14 +74,14 @@ class JobTest {
             override fun onStarted(input: Unit, job: Job<Unit, Nothing>) {
                 assertFalse(started)
                 assertFalse(failed)
-                assertEquals(JobStatus.Running, job.status)
+                assertEquals(State.Running, job.status)
                 started = true
             }
 
             override fun onFailure(exception: Exception, job: Job<Unit, Nothing>) {
                 assertTrue(started)
                 assertFalse(failed)
-                assertEquals(JobStatus.Failed, job.status)
+                assertEquals(State.Failed, job.status)
                 failed = true
             }
         })

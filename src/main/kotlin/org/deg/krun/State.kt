@@ -1,6 +1,6 @@
 package org.deg.krun
 
-enum class JobStatus {
+enum class State {
     Inactive,
     Scheduled,
     Running,

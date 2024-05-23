@@ -16,9 +16,9 @@ open class Job<I, O>(
     private val runMethod: (input: I) -> O
 ) {
     /**
-     * The current [JobStatus] describes the current state of the Job. For example, it could be [JobStatus.Running].
+     * The current [State] describes the current state of the Job. For example, it could be [State.Running].
      */
-    var status: JobStatus = JobStatus.Inactive
+    var status: State = State.Inactive
         private set
     private val jobEventListeners: MutableList<IJobEventListener<I, O>> = ArrayList()
     private var output: O? = null
@@ -77,7 +77,7 @@ open class Job<I, O>(
     }
 
     protected open fun onStarted(input: I) {
-        status = JobStatus.Running
+        status = State.Running
         jobEventListeners.forEach {
             try {
                 it.onStarted(input, this)
@@ -88,7 +88,7 @@ open class Job<I, O>(
     }
 
     protected open fun onDone(input: I, output: O) {
-        status = JobStatus.Done
+        status = State.Done
         this.output = output
         synchronized(finishedLock) {
             finishedLock.notifyAll()
@@ -103,7 +103,7 @@ open class Job<I, O>(
     }
 
     internal open fun onScheduled() {
-        status = JobStatus.Scheduled
+        status = State.Scheduled
         jobEventListeners.forEach {
             try {
                 it.onScheduled(this)
@@ -114,7 +114,7 @@ open class Job<I, O>(
     }
 
     protected open fun onFailure(e: Exception) {
-        status = JobStatus.Failed
+        status = State.Failed
         jobEventListeners.forEach {
             try {
                 it.onFailure(e, this)
@@ -125,7 +125,7 @@ open class Job<I, O>(
     }
 
     internal open fun onCancel() {
-        status = JobStatus.Canceled
+        status = State.Canceled
         jobEventListeners.forEach {
             try {
                 it.onCancel(this)
