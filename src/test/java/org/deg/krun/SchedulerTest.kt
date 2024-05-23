@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
 import java.lang.Thread.sleep
+import java.util.concurrent.RejectedExecutionException
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 
@@ -130,6 +131,16 @@ class SchedulerTest {
         assertTrue(success)
         assertTrue(canceled)
         assertEquals(State.Canceled, job.state)
+    }
+
+    @Test
+    fun `test shutdown`() {
+        Scheduler.schedule(Job {})
+        Scheduler.shutdown()
+        try {
+            Scheduler.schedule(Job {})
+            fail("Expected a ${RejectedExecutionException::class.java.simpleName} to be thrown")
+        } catch (_: RejectedExecutionException) {}
     }
 
     companion object {
