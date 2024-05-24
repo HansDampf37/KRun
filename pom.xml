@@ -33,6 +33,7 @@
         <kotlin.version>1.9.24</kotlin.version>
         <junit.version>5.11.0-M2</junit.version>
         <kotlinx.version>1.8.1</kotlinx.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
 
@@ -86,6 +87,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
                 <configuration>
                     <source>8</source>
                     <target>8</target>
