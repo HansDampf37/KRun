@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit
  * @see schedule
  * @author Adrian Degenkolb
  */
-object Scheduler {
+class Scheduler {
     private val threadPool = Executors.newCachedThreadPool()
 
     /**
@@ -144,21 +144,3 @@ object Scheduler {
         })
     }
 }
-
-/**
- * Schedules this Job on a [Scheduler] for asynchronous execution.
- * @param input input arguments for the job's [run method][Job.run]
- * @param delay delay after which the job is executed
- * @param unit timeunit for the delay
- * @return Future containing the output of the [run method][Job.run]
- */
-fun <I, O> Job<I, O>.schedule(input: I, delay: Long = 0, unit: TimeUnit = TimeUnit.SECONDS): Future<O> {
-    return Scheduler.schedule(this, input, delay, unit)
-}
-
-/**
- * Invoke [Job.schedule] with Unit as input
- */
-fun <O> Job<Unit, O>.schedule(delay: Long = 0, unit: TimeUnit = TimeUnit.SECONDS): Future<O> = schedule(Unit, delay, unit)
-
-operator fun <I1, O1: I2, I2, O2> Job<I1, O1>.plus(other: Job<I2, O2>) = Scheduler.scheduleAfter(other, this)

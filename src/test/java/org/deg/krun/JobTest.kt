@@ -136,13 +136,15 @@ class JobTest {
 
     @Test
     fun `test contents of statistic`() {
+        val scheduler = Scheduler()
         val epsilon = 30L
         val jobDuration = 1000L
         val schedulingDelay = 200L
         val job = Job<Unit, Unit> {
             sleep(jobDuration)
         }
-        Scheduler.schedule(job, schedulingDelay, TimeUnit.MILLISECONDS).get()
+        scheduler.schedule(job, schedulingDelay, TimeUnit.MILLISECONDS).get()
+        scheduler.shutdown()
         assertNull(job.statistic.canceledAt)
         assertNull(job.statistic.failedAt)
         assertNotNull(job.statistic.scheduledAt)
@@ -155,14 +157,6 @@ class JobTest {
                 Duration.between(job.statistic.scheduledAt, job.statistic.startedAt).toMillis() - schedulingDelay
             ) < epsilon
         )
-    }
-
-    companion object {
-        @JvmStatic
-        @AfterAll
-        fun cleanUp() {
-            //Scheduler.shutdown()
-        }
     }
 }
 

@@ -1,7 +1,8 @@
 package org.deg.krun
 
-import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
 import java.lang.Thread.sleep
@@ -10,6 +11,13 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 
 class SchedulerTest {
+    private lateinit var scheduler: Scheduler
+
+    @BeforeEach
+    fun setup() {
+        scheduler = Scheduler()
+    }
+
     @Test
     fun `test that job is scheduled and then started`() {
         var scheduled = false
@@ -28,7 +36,7 @@ class SchedulerTest {
                 started = true
             }
         })
-        Scheduler.schedule(job, Unit).get()
+        scheduler.schedule(job, Unit).get()
         assertTrue(scheduled && started)
     }
 
@@ -48,7 +56,7 @@ class SchedulerTest {
         })
         val delay: Long = 1000
         val epsilon = 10
-        Scheduler.schedule(job, Unit, delay, TimeUnit.MILLISECONDS).get()
+        scheduler.schedule(job, Unit, delay, TimeUnit.MILLISECONDS).get()
         assertTrue(started - scheduled > delay - epsilon)
     }
 
@@ -56,7 +64,7 @@ class SchedulerTest {
     fun `test future timing out when job takes to long throws TimeoutException`() {
         val job = Job<Unit, Unit> { sleep(10000) }
         try {
-            Scheduler.schedule(job, Unit).get(10, TimeUnit.MILLISECONDS)
+            scheduler.schedule(job, Unit).get(10, TimeUnit.MILLISECONDS)
             fail("Expected a timeout to be thrown")
         } catch (_: TimeoutException) {
         }
@@ -66,8 +74,8 @@ class SchedulerTest {
     fun `test automatic scheduling after another job`() {
         val calculateSomething = Job<Int, Int> { return@Job it * it }
         val printResults = Job<Any, String> { it.toString() }
-        val future = Scheduler.scheduleAfter(printResults, calculateSomething)
-        Scheduler.schedule(calculateSomething, 3)
+        val future = scheduler.scheduleAfter(printResults, calculateSomething)
+        scheduler.schedule(calculateSomething, 3)
         val result = future.get()
         assertEquals("9", result)
     }
@@ -76,8 +84,8 @@ class SchedulerTest {
     fun `test automatic scheduling after another job with output transformation`() {
         val calculateSomething = Job<Int, Int> { return@Job it * it }
         val countSymbols = Job<String, Int> { it.length }
-        val future = Scheduler.scheduleAfter(countSymbols, calculateSomething) { it.toString() }
-        Scheduler.schedule(calculateSomething, 10)
+        val future = scheduler.scheduleAfter(countSymbols, calculateSomething) { it.toString() }
+        scheduler.schedule(calculateSomething, 10)
         val result = future.get()
         assertEquals(3, result)
     }
@@ -89,8 +97,8 @@ class SchedulerTest {
             return@Job 1
         }
         val dependingJob = Job<Int, Int> { it * it }
-        val futureSlowJob = Scheduler.schedule(slowJob)
-        val futureDependingJob = Scheduler.scheduleAfter(dependingJob, slowJob)
+        val futureSlowJob = scheduler.schedule(slowJob)
+        val futureDependingJob = scheduler.scheduleAfter(dependingJob, slowJob)
         futureSlowJob.cancel(true)
         assertTrue(futureDependingJob.isCancelled)
         assertEquals(State.Canceled, dependingJob.state)
@@ -102,8 +110,8 @@ class SchedulerTest {
             throw Exception()
         }
         val dependingJob = Job<Int, Int> { it * it }
-        val futureDependingJob = Scheduler.scheduleAfter(dependingJob, slowJob)
-        Scheduler.schedule(slowJob)
+        val futureDependingJob = scheduler.scheduleAfter(dependingJob, slowJob)
+        scheduler.schedule(slowJob)
         sleep(30)
         assertTrue(futureDependingJob.isCancelled)
         assertEquals(State.Canceled, dependingJob.state)
@@ -126,7 +134,7 @@ class SchedulerTest {
             sleep(10000)
             return@Job 0
         }
-        val future = job.schedule()
+        val future = scheduler.schedule(job)
         val success = future.cancel(true)
         assertTrue(success)
         assertTrue(canceled)
@@ -135,19 +143,16 @@ class SchedulerTest {
 
     @Test
     fun `test shutdown`() {
-        Scheduler.schedule(Job {})
-        Scheduler.shutdown()
+        scheduler.schedule(Job {})
+        scheduler.shutdown()
         try {
-            Scheduler.schedule(Job {})
+            scheduler.schedule(Job {})
             fail("Expected a ${RejectedExecutionException::class.java.simpleName} to be thrown")
         } catch (_: RejectedExecutionException) {}
     }
 
-    companion object {
-        @JvmStatic
-        @AfterAll
-        fun cleanUp() {
-            Scheduler.shutdown()
-        }
+    @AfterEach
+    fun cleanUp() {
+        scheduler.shutdown()
     }
 }

@@ -1,5 +1,7 @@
 package org.deg.krun
 
+import java.io.File
+
 class Aggregate(
     inputJobs: List<Job<*, *>> = listOf(),
     onReady: (List<*>) -> Unit
@@ -27,13 +29,18 @@ class Aggregate(
 }
 
 fun main() {
-    val job = DoSomething()
-    job.run()
-}
-class DoSomething: Job<Unit, Int>() {
-    override fun runMethod(input: Unit): Int {
-        return 1
+    val scheduler = Scheduler()
+    val downloadJob = Job<String, File> {
+        File(it)
     }
+    val countLines = Job<String, Int> {
+        it.lines().size
+    }
+    val futureForProcessingDownload = scheduler.scheduleAfter(countLines, downloadJob) {
+        it.readText()
+    }
+    scheduler.schedule(downloadJob, "README.md")
+    val amountOfLines = futureForProcessingDownload.get()
+    println("Readme has $amountOfLines lines")
+    scheduler.shutdown()
 }
-
-
