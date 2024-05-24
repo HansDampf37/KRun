@@ -18,14 +18,14 @@ interface IJobEventListener<I, O> {
     fun onScheduled(job: Job<I, O>) {}
 
     /**
-     * Is triggered right before the Job's [Job.runMethod] is invoked.
+     * Is triggered right before the Job's [Job.runMethodArg] is invoked.
      * @param job the [Job] that triggered this event.
      * @param input the input arguments for the run method
      */
     fun onStarted(input: I, job: Job<I, O>) {}
 
     /**
-     * Is triggered right after the Job's [Job.runMethod] has finished.
+     * Is triggered right after the Job's [Job.runMethodArg] has finished.
      * @param job the [Job] that triggered this event.
      * @param output the output produced by the run method
      * @param input the input arguments for the run method.
@@ -33,7 +33,7 @@ interface IJobEventListener<I, O> {
     fun onDone(input: I, output: O, job: Job<I, O>) {}
 
     /**
-     * Is triggered when the Job's [Job.runMethod] throws an uncaught exception.
+     * Is triggered when the Job's [Job.runMethodArg] throws an uncaught exception.
      * @param job the [Job] that triggered this event.
      * @param exception the thrown exception
      */

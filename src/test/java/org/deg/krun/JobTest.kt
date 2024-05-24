@@ -2,6 +2,7 @@ package org.deg.krun
 
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
+import java.lang.IllegalStateException
 import java.lang.Thread.sleep
 import java.time.Duration
 import java.util.concurrent.TimeUnit
@@ -67,6 +68,42 @@ class JobTest {
     }
 
     @Test
+    fun `test run on subclass of job`() {
+        var started = false
+        var done = false
+        val eventListener = object : IJobEventListener<Int, String> {
+            override fun onStarted(input: Int, job: Job<Int, String>) {
+                assertFalse(started)
+                assertFalse(done)
+                assertEquals(State.Running, job.state)
+                started = true
+            }
+
+            override fun onDone(input: Int, output: String, job: Job<Int, String>) {
+                assertTrue(started)
+                assertFalse(done)
+                assertEquals(State.Done, job.state)
+                done = true
+            }
+        }
+        val result = object: Job<Int, String>(jobEventListener = eventListener) {
+            override fun runMethod(input: Int): String {
+                return input.toString()
+            }
+        }.run(1)
+        assertTrue(started && done)
+        assertEquals("1", result)
+    }
+
+    @Test
+    fun `test undefined run behaviour triggers exception`() {
+        try {
+            Job<Unit, Unit>().run()
+            fail("Expected an ${IllegalStateException::class.java.simpleName} to be thrown")
+        } catch (_: IllegalStateException) { }
+    }
+
+    @Test
     @Suppress("IMPLICIT_NOTHING_TYPE_ARGUMENT_IN_RETURN_POSITION", "UNREACHABLE_CODE")
     fun testFailingRun() {
         val failJob = Job<Unit, Nothing> {
@@ -124,7 +161,7 @@ class JobTest {
         @JvmStatic
         @AfterAll
         fun cleanUp() {
-            Scheduler.shutdown()
+            //Scheduler.shutdown()
         }
     }
 }

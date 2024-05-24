@@ -25,3 +25,15 @@ class Aggregate(
         return previousJobsFinished.all { it }
     }
 }
+
+fun main() {
+    val job = DoSomething()
+    job.run()
+}
+class DoSomething: Job<Unit, Int>() {
+    override fun runMethod(input: Unit): Int {
+        return 1
+    }
+}
+
+

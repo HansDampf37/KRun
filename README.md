@@ -62,7 +62,7 @@ exitProcess(0)
 Now we have two jobs.
 As both operations are pretty complex, the calculations tend to take their time, and it would be inefficient to run them sequentially.
 However, we can also schedule them on a scheduler for asynchronous execution and then wait for the returned futures to finish.
-Remember to always shut down the Schedulers threads by either invoking `exitProcess` or `Scheduler.shutdown`. Similar to
+Remember to always shut down the Scheduler's threads by either invoking `exitProcess` or `Scheduler.shutdown`. Similar to
 `run`-Method the `schedule`-method also accepts arguments.
 ````kotlin
 val future = Scheduler.schedule(job, input)
