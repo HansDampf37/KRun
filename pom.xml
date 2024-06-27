@@ -10,8 +10,8 @@
     <url>https://github.com/HansDampf37/KRun</url>
     <licenses>
         <license>
-            <name>The Apache Software License, Version 2.0</name>
-            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <name>MIT License</name>
+            <url>https://www.opensource.org/license/mit-license.php</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
